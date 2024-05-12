@@ -9,9 +9,9 @@ const session = require('express-session');
 
 const pool = new Pool({
     user: 'postgres',
-    host: 'localhost',
+    host: '',
     database: 'postgres',
-    password: 'Steammate',
+    password: '',
     port: 5432, // Default PostgreSQL port
 });
 
