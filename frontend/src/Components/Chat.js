@@ -42,12 +42,12 @@ class Chat extends Component {
         const reader = new FileReader();
         reader.onload = () => {
           const message = JSON.parse(reader.result);
-          this.addMessage(message);
+          this.loadMessage(message);
         };
         reader.readAsText(evt.data);
       } else {
         const message = JSON.parse(evt.data);
-        this.addMessage(message);
+        this.loadMessage(message);
       }
     };
 
@@ -57,16 +57,30 @@ class Chat extends Component {
         ws: new WebSocket(URL),
       });
     };
+    this.setState(prevState => ({
+      messages: prevState.messages.reverse()
+    }));
   }
-
-  addMessage = message => {
-    message.timestamp = new Date(); // Add a timestamp to the message
+  loadMessage = message => {
     this.setState(prevState => {
-      const updatedMessages = [message, ...prevState.messages];
+      const updatedMessages = [...prevState.messages, message];
+      return { messages: updatedMessages };
+    });
+  }
+  addMessage = message => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const currentTime = `${hours}:${minutes}:${seconds}`;
+  
+    const messageWithTimestamp = { ...message, timestamp: currentTime };
+  
+    this.setState(prevState => {
+      const updatedMessages = [messageWithTimestamp, ...prevState.messages];
       return { messages: updatedMessages };
     });
   };
-
 
   submitMessage = messageString => {
     const { conversation_id, user_id, name } = this.state;
@@ -81,11 +95,11 @@ class Chat extends Component {
   };
 
   render() {
-    const { user_id, messages } = this.state;
-
-    // Reverse the order of messages if sent by the current user
-    const reversedMessages = [...messages].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)).reverse();
-
+    const { user_id } = this.state;
+    const { messages } = this.state;
+  
+    const reversedMessages = [...messages].reverse();
+  
     return (
       <div>
         <ChatInput
@@ -99,15 +113,15 @@ class Chat extends Component {
               <ChatMessage
                 message={message.content}
                 name={message.username}
-                timestamp={message.timestamp.toString()} // Convert timestamp to string
+                timestamp={message.timestamp}
               />
             </div>
-
           );
         })}
       </div>
     );
   }
+  
 }
 
 export default Chat;

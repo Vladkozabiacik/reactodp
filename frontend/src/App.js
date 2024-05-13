@@ -17,7 +17,6 @@ const App = () => {
   const handleLogin = (token) => {
     setAuthToken(token);
     localStorage.setItem('authToken', token);
-
   };
 
   const handleLogout = () => {
