@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Chat from './Components/Chat';
@@ -6,6 +5,7 @@ import Login from './Components/Login';
 
 const App = () => {
   const [authToken, setAuthToken] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -17,10 +17,12 @@ const App = () => {
   const handleLogin = (token) => {
     setAuthToken(token);
     localStorage.setItem('authToken', token);
+
   };
 
   const handleLogout = () => {
     setAuthToken(null);
+    setUser(null);
     localStorage.removeItem('authToken');
   };
 
@@ -30,9 +32,9 @@ const App = () => {
         <Login onLogin={handleLogin} />
       ) : (
         <div>
-          <h1>Welcome, {}!</h1>
+          <h1>Welcome, {user && user.username}!</h1>
           <button onClick={handleLogout}>Logout</button>
-          <Chat />
+          <Chat user={user} />
         </div>
       )}
     </div>

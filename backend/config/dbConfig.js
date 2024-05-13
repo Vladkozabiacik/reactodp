@@ -1,3 +1,6 @@
+// dbConfig.js
+const { Pool } = require('pg');
+
 const pool = new Pool({
     user: 'pi',
     host: '95.103.4.69',
@@ -5,3 +8,5 @@ const pool = new Pool({
     password: 'superDatabaza',
     port: 5432, // Default PostgreSQL port
 });
+
+module.exports = pool;

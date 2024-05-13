@@ -42,7 +42,6 @@ app.post('/register', async (req, res) => {
 });
 
 
-
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -58,12 +57,13 @@ app.post('/login', async (req, res) => {
         if (passwordMatch) {
             const authToken = jwt.sign({ userId: user.user_id }, 'your_secret_key', { expiresIn: '1h' });
             req.session.isLoggedIn = true;
-            req.session.user = { email, username: user.username };
+            req.session.user = { email, username: user.username, userId: user.user_id };
 
             return res.status(200).json({ message: 'Login successful', authToken, user: req.session.user });
         } else {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
+        
     } catch (error) {
         console.error('Error authenticating user:', error);
         return res.status(500).json({ message: 'Error authenticating user' });
@@ -106,13 +106,15 @@ wss.on('connection', async function connection(ws, req) {
             const sessionData = req.session;
             const message = JSON.parse(data);
             // Check for null fields before inserting into the database
-            if (message.conversation_id && message.user_id && message.message) {
+            if (message.conversation_id && message.user_id && message.content) {
                 console.log(message);
                 // Insert the received message into the Messages table
                 const client = await pool.connect();
+                const current_time = new Date();
+                message.timestamp = current_time;
                 await client.query(
                     'INSERT INTO Messages (conversation_id, user_id, content, timestamp) VALUES ($1, $2, $3, $4)',
-                    [message.conversation_id, message.user_id, message.message, new Date()]
+                    [message.conversation_id, message.user_id, message.content, current_time]
                 );
                 client.release();
             } else {
@@ -121,7 +123,7 @@ wss.on('connection', async function connection(ws, req) {
         } catch (error) {
             console.error('Error inserting message:', error);
         }
-    
+
         // Broadcast the received message to all connected clients
         wss.clients.forEach(function each(client) {
             if (client !== ws && client.readyState === WebSocket.OPEN) {
@@ -129,7 +131,7 @@ wss.on('connection', async function connection(ws, req) {
             }
         });
     });
-    
+
 });
 
 // Start the Express server

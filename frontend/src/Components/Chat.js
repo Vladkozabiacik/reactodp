@@ -5,21 +5,36 @@ import ChatMessage from './ChatMessage';
 const URL = 'ws://localhost:3030';
 
 class Chat extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      conversation_id: props.conversation_id || 1,
-      user_id: props.user_id || 1,
-      name: props.username || 'DacoSaPokazilo',
-      messages: [],
-    };
-    this.ws = new WebSocket(URL);
-  }
+  state = {
+    conversation_id: this.props.conversation_id || 1,
+    user_id: null,
+    name: null,
+    messages: [],
+  };
+
+  ws = new WebSocket(URL);
 
   componentDidMount() {
+    const cookies = document.cookie.split(';');
+    let username = null;
+    let user_id = null;
+    cookies.forEach(cookie => {
+      const [key, value] = cookie.split('=');
+      if (key.trim() === 'username') {
+        username = value;
+      } else if (key.trim() === 'user_id') {
+        user_id = parseInt(value);
+      }
+    });
+
+    this.setState({
+      user_id,
+      name: username || 'DacoSaPokazilo'
+    });
+
     this.ws.onopen = () => {
       console.log('Connected');
-      this.ws.send(JSON.stringify(this.state.user_id));
+      this.ws.send(JSON.stringify(user_id));
     };
 
     this.ws.onmessage = evt => {
@@ -45,19 +60,21 @@ class Chat extends Component {
   }
 
   addMessage = message => {
+    message.timestamp = new Date(); // Add a timestamp to the message
     this.setState(prevState => {
-      const updatedMessages = [...prevState.messages, message];
-      console.log('Updated messages:', updatedMessages);
+      const updatedMessages = [message, ...prevState.messages];
       return { messages: updatedMessages };
     });
   };
 
+
   submitMessage = messageString => {
+    const { conversation_id, user_id, name } = this.state;
     const message = {
-      conversation_id: this.state.conversation_id,
-      user_id: this.state.user_id,
-      username: this.state.name,
-      message: messageString,
+      conversation_id,
+      user_id,
+      username: name,
+      content: messageString,
     };
     this.ws.send(JSON.stringify(message));
     this.addMessage(message);
@@ -66,21 +83,26 @@ class Chat extends Component {
   render() {
     const { user_id, messages } = this.state;
 
+    // Reverse the order of messages if sent by the current user
+    const reversedMessages = [...messages].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)).reverse();
+
     return (
       <div>
         <ChatInput
           ws={this.ws}
           onSubmitMessage={messageString => this.submitMessage(messageString)}
         />
-        {messages.map((message, index) => {
+        {reversedMessages.map((message, index) => {
           const isUserSender = message.user_id === user_id;
           return (
-            <div key={index} style={{ textAlign: isUserSender ? 'right' : 'left' }}> {/* tento barbarsky pocin vieme passnut do props ChatMessageu ako boolean ak bude true tak sa zobrazi iny styling etc, docasne! */}
+            <div key={index} style={{ textAlign: isUserSender ? 'right' : 'left' }}>
               <ChatMessage
                 message={message.content}
                 name={message.username}
+                timestamp={message.timestamp.toString()} // Convert timestamp to string
               />
             </div>
+
           );
         })}
       </div>

@@ -21,6 +21,8 @@ const Login = ({ onLogin }) => {
             const data = await response.json();
             if (response.ok) {
                 onLogin(data.authToken);
+                document.cookie = `username=${data.user.username};`;
+                document.cookie = `user_id=${data.user.userId};`;
             } else {
                 console.error('Error:', data.message);
             }
