@@ -6,14 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const session = require('express-session');
-
-const pool = new Pool({
-    user: 'postgres',
-    host: '',
-    database: 'postgres',
-    password: '',
-    port: 5432, // Default PostgreSQL port
-});
+const pool = require('./config/dbConfig.js');
 
 const app = express();
 const port = 3001;
