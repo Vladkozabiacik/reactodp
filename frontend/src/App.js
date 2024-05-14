@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import Chat from './Components/Chat';
 import Login from './Components/Login';
+import Dashboard from './Components/Dashboard';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Chat from './Components/Chat';
 
 const App = () => {
   const [authToken, setAuthToken] = useState(null);
-  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // For loading state
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
       setAuthToken(token);
     }
+    setLoading(false); // Set loading to false once useEffect is done
   }, []);
 
   const handleLogin = (token) => {
@@ -21,22 +24,26 @@ const App = () => {
 
   const handleLogout = () => {
     setAuthToken(null);
-    setUser(null);
     localStorage.removeItem('authToken');
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
-    <div>
-      {!authToken ? (
-        <Login onLogin={handleLogin} />
-      ) : (
-        <div>
-          <h1>Welcome, {user && user.username}!</h1>
-          <button onClick={handleLogout}>Logout</button>
-          <Chat user={user} />
-        </div>
-      )}
-    </div>
+    <Router>
+      <Routes>
+        <Route
+          path="/chat/:chat_id"
+          element={<Chat />}
+        />
+        <Route
+          path="/"
+          element={!authToken ? <Login onLogin={handleLogin} /> : <Dashboard authToken={authToken} onLogout={handleLogout} />}
+        />
+      </Routes>
+    </Router>
+
   );
 };
 
