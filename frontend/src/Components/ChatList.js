@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ChatCard from './ChatCard.js';
-
+import './ChatList.css';
+import './SearchBar.js';
+import SearchBar from './SearchBar.js';
 const ChatList = () => {
     const [chats, setChats] = useState([]);
     const [newChatId, setNewChatId] = useState('');
     const [password, setPassword] = useState('');
     const [userId, setUserId] = useState(null);
-    const [isNameInput, setIsNameInput] = useState(false); // State to track whether chat name or chat ID input is active
+    const [isNameInput, setIsNameInput] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const chatListRef = useRef(null);
 
     const getCookie = (name) => {
         const cookies = document.cookie.split(';');
@@ -19,6 +26,14 @@ const ChatList = () => {
         return null;
     };
 
+    const handleSearch = (term) => {
+        setSearchTerm(term);
+    };
+
+    const filteredChats = chats.filter(chat => {
+        return chat.name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
     useEffect(() => {
         const id = getCookie('user_id');
         if (!id) {
@@ -27,7 +42,7 @@ const ChatList = () => {
         }
         setUserId(id);
 
-        fetch(`http://10.1.3.183:3001/chats?userId=${id}`)
+        fetch(`http://${process.env.REACT_APP_HOST}:3001/chats?userId=${id}`)
             .then(response => response.json())
             .then(data => setChats(data))
             .catch(error => console.error('Error fetching chats:', error));
@@ -39,9 +54,9 @@ const ChatList = () => {
             return;
         }
 
-        const requestBody = isNameInput ? { chatName: newChatId, password: password } : { chatId: newChatId, password: password };
+        const requestBody = !isNameInput ? { chatName: newChatId, password: password } : { chatId: newChatId, password: password };
 
-        fetch(`http://10.1.3.183:3001/users/${userId}/chats`, {
+        fetch(`http://${process.env.REACT_APP_HOST}:3001/${userId}/chats`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -50,20 +65,46 @@ const ChatList = () => {
         })
             .then(response => {
                 if (response.ok) {
+                    setSuccess(true);
+                    setError(null);
                     console.log('Chat added successfully');
+                    setTimeout(() => {
+                        setSuccess(null);
+                    }, 3000);
+                    return fetch(`http://${process.env.REACT_APP_HOST}:3001/chats?userId=${userId}`);
                 } else {
+                    setError('Failed to add chat');
+                    setSuccess(false);
                     console.error('Failed to add chat');
                 }
             })
+            .then(response => response.json())
+            .then(data => {
+                setChats(data);
+                setTimeout(() => {
+                    scrollToBottom();
+                }, 1000);
+            })
             .catch(error => {
+                setError('Error adding chat');
+                setSuccess(false);
                 console.error('Error adding chat:', error);
+                setTimeout(() => {
+                    setError(null);
+                }, 3000);
             });
+    };
+
+    const scrollToBottom = () => {
+        if (chatListRef.current) {
+            chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
+        }
     };
 
     return (
         <div>
             <h2>Your chats</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '20rem' }}>
+            <div className='chat-list-wrapper'>
                 <label>
                     <input
                         type="checkbox"
@@ -110,10 +151,12 @@ const ChatList = () => {
                         />
                     </label>
                 </div>
+                <button onClick={handleAddChat} className='add-chat-button'>Add Chat</button>
+                {error && <p className="error-message">{error}</p>}
             </div>
-            <button onClick={handleAddChat}>Add Chat</button>
-            <div className="card-list">
-                {chats.map(chat => (
+            <div ref={chatListRef} className="card-list">
+                <SearchBar onSearch={handleSearch} />
+                {filteredChats.map(chat => (
                     <ChatCard key={chat.chat_id} chat={chat} />
                 ))}
             </div>

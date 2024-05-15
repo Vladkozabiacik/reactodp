@@ -8,7 +8,7 @@ const ChatProfile = () => {
     useEffect(() => {
         const fetchChatInfo = async () => {
             try {
-                const response = await fetch(`http://10.1.3.183:3001/chat/profile/${chat_id}`);
+                const response = await fetch(`http://${process.env.REACT_APP_HOST}:3001/chat/profile/${chat_id}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch chat information');
                 }

@@ -14,7 +14,7 @@ const CreateChat = () => {
         setSuccess(false);
 
         try {
-            const response = await fetch('http://10.1.3.183:3001/createChat', {
+            const response = await fetch(`http://${process.env.REACT_APP_HOST}:3001/createChat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ const CreateChat = () => {
             }
 
             setSuccess(true);
-            setChatId(responseData.chatId); // Set the chatId from the response
+            setChatId(responseData.chatId);
             setTimeout(() => {
                 setSuccess(false);
             }, 3000);

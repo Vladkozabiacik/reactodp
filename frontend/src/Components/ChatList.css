@@ -1,0 +1,42 @@
+.chat-list-wrapper {
+    padding-bottom: 2rem;
+}
+.add-chat-button {
+    padding: 10px 20px;
+    background-color: #404040;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 10vw;
+}
+
+.add-chat-button:hover {
+    background-color: #2f2e2c;
+}
+.card-list {
+    display: flex;
+    overflow-y: auto;
+    max-height: 50vh;
+    flex-direction: column;
+    max-width: calc(20rem + 10px);
+    border: solid 0.5rem #c6c6c6;
+    border-right: none;
+    padding: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 1rem;
+}
+
+::-webkit-scrollbar-track {
+    background: #c6c6c6;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3f3f3f;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #212121;
+}

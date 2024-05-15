@@ -6,16 +6,21 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const session = require('express-session');
 const pool = require('./config/dbConfig.js');
+require('dotenv').config();
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
+const websocketPort = process.env.WEBSOCKET_PORT || 3030;
+const host = process.env.HOST || '0.0.0.0';
+const secretKey = process.env.SECRET_KEY || 'default_secret_key';
 
 app.use(cors(), bodyParser.json(), session({
-    secret: 'your_secret_key',
+    secret: secretKey,
     resave: false,
     saveUninitialized: false
 }));
-// login and register
+
+// login and register endpoints
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -29,7 +34,7 @@ app.post('/login', async (req, res) => {
         const user = result.rows[0];
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
-            const authToken = jwt.sign({ userId: user.user_id }, 'your_secret_key', { expiresIn: '1h' });
+            const authToken = jwt.sign({ userId: user.user_id }, secretKey, { expiresIn: '1h' });
             req.session.isLoggedIn = true;
             req.session.user = { email, username: user.username, userId: user.user_id };
 
@@ -43,6 +48,7 @@ app.post('/login', async (req, res) => {
         return res.status(500).json({ message: 'Error authenticating user' });
     }
 });
+
 app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -61,7 +67,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// chats and messages
+// chats and messages endpoints
 app.get('/chats', async (req, res) => {
     const userId = req.query.userId;
     if (!userId) {
@@ -82,13 +88,13 @@ app.get('/chats', async (req, res) => {
     }
 });
 
-
 app.post('/users/:userId/chats', async (req, res) => {
     const userId = req.params.userId;
     const { chatId, chatName, password } = req.body;
-    let client; // Define client outside the try block
+    let client;
+
     try {
-        client = await pool.connect(); // Assign client here
+        client = await pool.connect();
 
         let chatExistsQuery, chatIdParam;
         if (chatId) {
@@ -101,7 +107,7 @@ app.post('/users/:userId/chats', async (req, res) => {
             client.release();
             return res.status(400).json({ message: 'Chat ID or name is required' });
         }
-        
+
         const chatExistsResult = await client.query(chatExistsQuery, [chatIdParam]);
         const chatExists = chatExistsResult.rows[0].count > 0;
 
@@ -116,6 +122,7 @@ app.post('/users/:userId/chats', async (req, res) => {
         } else if (chatName) {
             getPasswordQuery = 'SELECT password_hash FROM chats WHERE name = $1';
         }
+
         const passwordResult = await client.query(getPasswordQuery, [chatIdParam]);
         const dbPassword = passwordResult.rows[0].password_hash;
 
@@ -130,12 +137,21 @@ app.post('/users/:userId/chats', async (req, res) => {
             chatIdParam = chatIdQueryResult.rows[0].chat_id;
         }
 
-        await client.query(
-            'UPDATE Users SET user_chats = user_chats || $1 WHERE user_id = $2',
-            [[chatIdParam], userId]
-        );
+        const updateQuery = `
+            UPDATE Users 
+            SET user_chats = user_chats || $1::bigint
+            WHERE user_id = $2
+            AND array_position(user_chats, $1::bigint) IS NULL
+            RETURNING user_chats;
+        `;
 
-        res.status(200).json({ message: 'Chat ID added to user chats successfully' });
+        const result = await client.query(updateQuery, [chatIdParam, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ message: 'Chat ID already exists in user chats' });
+        }
+
+        res.status(200).json({ message: 'Chat ID added to user chats successfully', user_chats: result.rows[0].user_chats });
     } catch (error) {
         console.error('Error adding chat ID to user chats:', error);
         res.status(500).json({ message: 'Error adding chat ID to user chats' });
@@ -145,6 +161,7 @@ app.post('/users/:userId/chats', async (req, res) => {
         }
     }
 });
+
 
 
 app.get('/chat/profile/:chat_id', async (req, res) => {
@@ -199,12 +216,12 @@ app.post('/createChat', async (req, res) => {
     }
 });
 
-
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at http://${host}:${port}`);
 });
+
 // WebSocket server
-const wss = new WebSocket.Server({ port: 3030, host: '0.0.0.0' });
+const wss = new WebSocket.Server({ port: websocketPort, host });
 
 wss.on('connection', async function connection(ws, req) {
     try {
@@ -214,7 +231,6 @@ wss.on('connection', async function connection(ws, req) {
             throw new Error('Conversation ID is missing.');
         }
 
-        // Fetch messages related to the conversation_id
         const client = await pool.connect();
         const result = await client.query('SELECT * FROM Messages JOIN Users ON Messages.user_id = Users.user_id WHERE Messages.conversation_id = $1 ORDER BY Messages.timestamp DESC LIMIT 10;', [conversationId]);
         client.release();
@@ -222,13 +238,10 @@ wss.on('connection', async function connection(ws, req) {
             ws.send(JSON.stringify(message));
         });
 
-        // Handle incoming messages from the client
         ws.on('message', async function incoming(data) {
             try {
                 const message = JSON.parse(data);
-                console.log(message);
                 if (message.user_id && message.content) {
-                    // Insert the received message into the database
                     const client = await pool.connect();
                     await client.query(
                         'INSERT INTO Messages (conversation_id, user_id, content) VALUES ($1, $2, $3)',
@@ -242,7 +255,6 @@ wss.on('connection', async function connection(ws, req) {
                 console.error('Error inserting message:', error);
             }
 
-            // Broadcast the message to all clients
             wss.clients.forEach(function each(client) {
                 if (client !== ws && client.readyState === WebSocket.OPEN) {
                     client.send(data);
@@ -253,9 +265,4 @@ wss.on('connection', async function connection(ws, req) {
         console.error('Error handling WebSocket connection:', error);
         ws.send(JSON.stringify({ error: 'Error handling WebSocket connection' }));
     }
-});
-
-
-app.listen(port, '10.1.3.183', () => {
-    console.log(`Server is listening at http://10.1.3.183:${port}`);
 });
