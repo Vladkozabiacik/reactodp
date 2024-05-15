@@ -119,6 +119,7 @@ const Chat = () => {
   return (
     <div>
       <Link to="/"><button>Go back to chats</button></Link>
+      <Link to={`/chat/profile/${state.conversation_id}`}><button>Group profile</button></Link>
       <ChatInput
         ws={ws}
         onSubmitMessage={messageString => submitMessage(messageString)}

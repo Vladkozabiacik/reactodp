@@ -1,0 +1,37 @@
+
+.create-chat-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.create-chat-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-chat-label {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.create-chat-button {
+    padding: 10px 20px;
+    background-color: #404040;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 10vw;
+}
+
+.create-chat-button:hover {
+    background-color: #0056b3;
+}
+
+.error-message {
+    color: red;
+}
+
+.success-message {
+    color: green;
+}

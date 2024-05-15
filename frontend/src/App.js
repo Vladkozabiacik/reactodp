@@ -4,7 +4,7 @@ import Login from './Components/Login';
 import Dashboard from './Components/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Chat from './Components/Chat';
-
+import ChatProfile from './Components/ChatProfile';
 const App = () => {
   const [authToken, setAuthToken] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,10 @@ const App = () => {
         <Route
           path="/chat/:chat_id"
           element={<Chat />}
+        />
+        <Route
+          path="/chat/profile/:chat_id"
+          element={<ChatProfile />}
         />
         <Route
           path="/"

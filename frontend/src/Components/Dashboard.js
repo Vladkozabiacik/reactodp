@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import ChatList from './ChatList';
+import CreateChat from './CreateChat';
 
 const Dashboard = ({ onLogout }) => {
     useEffect(() => {
@@ -17,6 +18,9 @@ const Dashboard = ({ onLogout }) => {
         <div>
             <div className="chat-dashboard">
                 <button onClick={handleLogout}>Logout</button>
+            </div>
+            <div>
+                <CreateChat />
             </div>
             <div>
                 <ChatList />

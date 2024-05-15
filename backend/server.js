@@ -85,12 +85,24 @@ app.get('/chats', async (req, res) => {
 
 app.post('/users/:userId/chats', async (req, res) => {
     const userId = req.params.userId;
-    const { chatId } = req.body;
+    const { chatId, chatName, password } = req.body;
+    let client; // Define client outside the try block
     try {
-        const client = await pool.connect();
+        client = await pool.connect(); // Assign client here
 
-        const chatExistsQuery = 'SELECT COUNT(*) FROM chats WHERE chat_id = $1';
-        const chatExistsResult = await client.query(chatExistsQuery, [chatId]);
+        let chatExistsQuery, chatIdParam;
+        if (chatId) {
+            chatExistsQuery = 'SELECT COUNT(*) FROM chats WHERE chat_id = $1';
+            chatIdParam = chatId;
+        } else if (chatName) {
+            chatExistsQuery = 'SELECT COUNT(*) FROM chats WHERE name = $1';
+            chatIdParam = chatName;
+        } else {
+            client.release();
+            return res.status(400).json({ message: 'Chat ID or name is required' });
+        }
+        
+        const chatExistsResult = await client.query(chatExistsQuery, [chatIdParam]);
         const chatExists = chatExistsResult.rows[0].count > 0;
 
         if (!chatExists) {
@@ -98,16 +110,58 @@ app.post('/users/:userId/chats', async (req, res) => {
             return res.status(404).json({ message: 'Chat not found' });
         }
 
+        let getPasswordQuery;
+        if (chatId) {
+            getPasswordQuery = 'SELECT password_hash FROM chats WHERE chat_id = $1';
+        } else if (chatName) {
+            getPasswordQuery = 'SELECT password_hash FROM chats WHERE name = $1';
+        }
+        const passwordResult = await client.query(getPasswordQuery, [chatIdParam]);
+        const dbPassword = passwordResult.rows[0].password_hash;
+
+        if (password && !bcrypt.compareSync(password, dbPassword)) {
+            client.release();
+            return res.status(401).json({ message: 'Incorrect password' });
+        }
+
+        let chatIdQueryResult;
+        if (!chatId) {
+            chatIdQueryResult = await client.query('SELECT chat_id FROM chats WHERE name = $1', [chatIdParam]);
+            chatIdParam = chatIdQueryResult.rows[0].chat_id;
+        }
+
         await client.query(
             'UPDATE Users SET user_chats = user_chats || $1 WHERE user_id = $2',
-            [[chatId], userId]
+            [[chatIdParam], userId]
         );
 
-        client.release();
         res.status(200).json({ message: 'Chat ID added to user chats successfully' });
     } catch (error) {
         console.error('Error adding chat ID to user chats:', error);
         res.status(500).json({ message: 'Error adding chat ID to user chats' });
+    } finally {
+        if (client) {
+            client.release();
+        }
+    }
+});
+
+
+app.get('/chat/profile/:chat_id', async (req, res) => {
+    const chatId = parseInt(req.params.chat_id);
+
+    try {
+        const query = 'SELECT chat_id, name FROM chats WHERE chat_id = $1';
+        const { rows } = await pool.query(query, [chatId]);
+
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ message: 'Chat not found' });
+        }
+    } catch (error) {
+        console.error('Error retrieving chat information:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
@@ -125,7 +179,30 @@ app.get('/messages/:chatId', async (req, res) => {
     }
 });
 
+app.post('/createChat', async (req, res) => {
+    const { name, password } = req.body;
 
+    if (!name || !password) {
+        return res.status(400).send({ message: 'Chat name and password are required' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const queryText = 'INSERT INTO chats (name, password_hash) VALUES ($1, $2) RETURNING chat_id, name';
+        const { rows } = await pool.query(queryText, [name, hashedPassword]);
+
+        res.status(201).send({ message: 'Chat created successfully!', chatId: rows[0].chat_id, chatName: rows[0].name });
+    } catch (error) {
+        console.error('Failed to create chat:', error);
+        res.status(500).send({ message: 'Failed to create chat' });
+    }
+});
+
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
 // WebSocket server
 const wss = new WebSocket.Server({ port: 3030, host: '0.0.0.0' });
 
