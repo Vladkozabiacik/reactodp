@@ -1,3 +1,5 @@
+VERSION 1.1 <br>
+
 TODO <br>
 code cleanup - priority HIGH :D <br>
 vytvorit global.css na common veci + uprava css-sok accordingly - priority HIGH <br>
