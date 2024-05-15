@@ -1,0 +1,48 @@
+
+:root {
+  --send-message-height: 56px;
+}
+.send-message {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #383838;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  
+  .send-message form {
+    width: 100%;
+    display: flex;
+  }
+  
+  .send-message input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #f3f3f3;
+    background-color: #323232;
+    color: rgb(202, 202, 202);
+    border-radius: 4px;
+    margin-right: 10px;
+    box-sizing: border-box;
+  }
+  
+  .send-message input[type="submit"] {
+    padding: 10px 20px;
+    background-color: #292929;
+    color: #f3f3f3;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .send-message input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  

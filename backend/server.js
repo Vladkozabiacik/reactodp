@@ -127,7 +127,7 @@ app.get('/messages/:chatId', async (req, res) => {
 
 
 // WebSocket server
-const wss = new WebSocket.Server({ port: 3030 });
+const wss = new WebSocket.Server({ port: 3030, host: '0.0.0.0' });
 
 wss.on('connection', async function connection(ws, req) {
     try {
@@ -179,6 +179,6 @@ wss.on('connection', async function connection(ws, req) {
 });
 
 
-app.listen(port, () => {
-    console.log(`Server is listening at http://localhost:${port}`);
+app.listen(port, '10.1.3.183', () => {
+    console.log(`Server is listening at http://10.1.3.183:${port}`);
 });

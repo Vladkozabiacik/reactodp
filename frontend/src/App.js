@@ -7,14 +7,14 @@ import Chat from './Components/Chat';
 
 const App = () => {
   const [authToken, setAuthToken] = useState(null);
-  const [loading, setLoading] = useState(true); // For loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
       setAuthToken(token);
     }
-    setLoading(false); // Set loading to false once useEffect is done
+    setLoading(false);
   }, []);
 
   const handleLogin = (token) => {
@@ -43,7 +43,6 @@ const App = () => {
         />
       </Routes>
     </Router>
-
   );
 };
 

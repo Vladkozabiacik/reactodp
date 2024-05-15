@@ -1,0 +1,36 @@
+/* ChatMessage.css */
+
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+    /* Adjust the width as needed */
+}
+
+.username-message {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.message-helper {
+    flex: 1;
+    margin-right: 10px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timestamp {
+    font-size: 0.8em;
+    color: #888;
+    white-space: nowrap;
+}
+
+.chat-wrapper {
+    margin-bottom: var(--send-message-height);
+}

@@ -9,8 +9,8 @@ const Login = ({ onLogin }) => {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
-            const url = isRegistering ? 'http://localhost:3001/register' : 'http://localhost:3001/login';
-            const body = isRegistering ? { username, email, password } : { email, password };
+            const url = isRegistering ? 'http://10.1.3.183:3001/register' : 'http://10.1.3.183:3001/login'; // Update the URL here
+            const body = isRegistering ? { username, email, password } : { email, password }; // Assuming 'username' is required only for registration
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {

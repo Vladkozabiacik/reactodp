@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import ChatCard from './ChatCard.js';
+
 const ChatList = () => {
     const [chats, setChats] = useState([]);
     const [newChatId, setNewChatId] = useState('');
-    const [userId, setUserId] = useState(null); 
+    const [userId, setUserId] = useState(null);
 
     const getCookie = (name) => {
         const cookies = document.cookie.split(';');
@@ -24,7 +25,7 @@ const ChatList = () => {
         }
         setUserId(id);
 
-        fetch(`http://localhost:3001/chats?userId=${id}`)
+        fetch(`http://10.1.3.183:3001/chats?userId=${id}`)
             .then(response => response.json())
             .then(data => setChats(data))
             .catch(error => console.error('Error fetching chats:', error));
@@ -36,7 +37,7 @@ const ChatList = () => {
             return;
         }
 
-        fetch(`http://localhost:3001/users/${userId}/chats`, {
+        fetch(`http://10.1.3.183:3001/users/${userId}/chats`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

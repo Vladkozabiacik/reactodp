@@ -2,22 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ChatInput from './ChatInput';
 import ChatMessage from './ChatMessage';
-
-
+import './Chat.css';
 const Chat = () => {
   const { chat_id } = useParams();
-  const [ws, setWs] = useState(null); // State to hold the WebSocket instance
+  const [ws, setWs] = useState(null);
   const [state, setState] = useState({
-    conversation_id: chat_id || null, // Use chat_id as conversation_id
+    conversation_id: chat_id || null,
     user_id: null,
     name: null,
     messages: [],
   });
 
-
   useEffect(() => {
     if (chat_id) {
-      // Logic that depends on chat_id
       const cookies = document.cookie.split(';');
       let username = null;
       let user_id = null;
@@ -36,7 +33,7 @@ const Chat = () => {
         name: username || 'DacoSaPokazilo'
       }));
 
-      const URL = `ws://localhost:3030?conversation_id=${chat_id}`;
+      const URL = `ws://10.1.3.183:3030?conversation_id=${chat_id}`;
       const wsInstance = new WebSocket(URL);
       setWs(wsInstance);
 
@@ -77,7 +74,6 @@ const Chat = () => {
     }
   }, [ws, state.conversation_id, state.user_id]);
   
-
   const loadMessage = message => {
     setState(prevState => ({
       ...prevState,
@@ -127,18 +123,20 @@ const Chat = () => {
         ws={ws}
         onSubmitMessage={messageString => submitMessage(messageString)}
       />
+      <div className='chat-wrapper'>
       {reversedMessages.map((message, index) => {
         const isUserSender = message.user_id === user_id;
-        return (
-          <div key={index} style={{ textAlign: isUserSender ? 'right' : 'left' }}>
-            <ChatMessage
-              message={message.content}
-              name={message.username}
-              timestamp={message.timestamp}
-            />
-          </div>
-        );
+          return (
+            <div key={index} style={{display: 'flex', justifyContent: isUserSender ? 'end' : 'start' }}>
+              <ChatMessage
+                message={message.content}
+                name={message.username}
+                timestamp={message.timestamp}
+              />
+            </div>
+          );
       })}
+      </div>
     </div>
   );
 };

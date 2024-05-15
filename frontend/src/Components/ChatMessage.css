@@ -12,3 +12,9 @@ p {
     padding: 0.3rem;
     border: 1px solid black;
 }
+
+.message-content {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+}
