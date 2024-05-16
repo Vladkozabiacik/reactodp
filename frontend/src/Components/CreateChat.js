@@ -44,7 +44,7 @@ const CreateChat = () => {
     return (
         <div className="create-chat-container">
             <h2 className="create-chat-title">Create a New Chat</h2>
-            <form className="create-chat-form" onSubmit={handleSubmit}>
+            <form className="create-chat-form" onSubmit={handleSubmit} autoComplete="off">
                 <div>
                     <label className="create-chat-label">
                         Chat Name:
@@ -54,6 +54,7 @@ const CreateChat = () => {
                             value={chatName}
                             onChange={(e) => setChatName(e.target.value)}
                             required
+                            autoComplete="off"
                         />
                     </label>
                 </div>
@@ -66,6 +67,7 @@ const CreateChat = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            autoComplete="new-password"
                         />
                     </label>
                 </div>

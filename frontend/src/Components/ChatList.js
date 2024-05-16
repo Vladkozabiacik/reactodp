@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatCard from './ChatCard.js';
 import './ChatList.css';
-import './SearchBar.js';
 import SearchBar from './SearchBar.js';
+
 const ChatList = () => {
     const [chats, setChats] = useState([]);
     const [newChatId, setNewChatId] = useState('');
@@ -54,9 +54,11 @@ const ChatList = () => {
             return;
         }
 
-        const requestBody = !isNameInput ? { chatName: newChatId, password: password } : { chatId: newChatId, password: password };
+        const requestBody = isNameInput
+            ? { chatId: newChatId, password: password }
+            : { chatName: newChatId, password: password };
 
-        fetch(`http://${process.env.REACT_APP_HOST}:3001/${userId}/chats`, {
+        fetch(`http://${process.env.REACT_APP_HOST}:3001/users/${userId}/chats`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,7 +71,7 @@ const ChatList = () => {
                     setError(null);
                     console.log('Chat added successfully');
                     setTimeout(() => {
-                        setSuccess(null);
+                        setSuccess(false);
                     }, 3000);
                     return fetch(`http://${process.env.REACT_APP_HOST}:3001/chats?userId=${userId}`);
                 } else {
@@ -103,13 +105,14 @@ const ChatList = () => {
 
     return (
         <div>
-            <h2>Your chats</h2>
+            <h2>Your Chats</h2>
             <div className='chat-list-wrapper'>
                 <label>
                     <input
                         type="checkbox"
                         checked={isNameInput}
                         onChange={() => setIsNameInput(!isNameInput)}
+                        autoComplete="off"
                     />
                     Join by Chat ID
                 </label>
@@ -123,6 +126,7 @@ const ChatList = () => {
                                 value={newChatId}
                                 onChange={e => setNewChatId(e.target.value)}
                                 placeholder="Enter Chat ID"
+                                autoComplete="off"
                             />
                         </label>
                     </div>
@@ -134,7 +138,8 @@ const ChatList = () => {
                                 type="text"
                                 value={newChatId}
                                 onChange={e => setNewChatId(e.target.value)}
-                                placeholder="Enter Chat name"
+                                placeholder="Enter Chat Name"
+                                autoComplete="off"
                             />
                         </label>
                     </div>
@@ -148,11 +153,13 @@ const ChatList = () => {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             required
+                            autoComplete="new-password"
                         />
                     </label>
                 </div>
                 <button onClick={handleAddChat} className='add-chat-button'>Add Chat</button>
                 {error && <p className="error-message">{error}</p>}
+                {success && <p className="success-message">Chat added successfully!</p>}
             </div>
             <div ref={chatListRef} className="card-list">
                 <SearchBar onSearch={handleSearch} />

@@ -17,7 +17,7 @@
 .card-list {
     display: flex;
     overflow-y: auto;
-    max-height: 50vh;
+    max-height: 30vh;
     flex-direction: column;
     max-width: calc(20rem + 10px);
     border: solid 0.5rem #c6c6c6;
