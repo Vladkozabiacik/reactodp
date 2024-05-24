@@ -18,12 +18,12 @@ const Dashboard = ({ onLogout }) => {
         <div>
             <div className="chat-dashboard">
                 <button onClick={handleLogout}>Logout</button>
-            </div>
-            <div>
-                <CreateChat />
-            </div>
-            <div>
-                <ChatList />
+                <div>
+                    <CreateChat />
+                </div>
+                <div>
+                    <ChatList />
+                </div>
             </div>
         </div>
     );

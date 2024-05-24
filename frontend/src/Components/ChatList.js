@@ -85,7 +85,7 @@ const ChatList = () => {
                 setChats(data);
                 setTimeout(() => {
                     scrollToBottom();
-                }, 1000);
+                }, 300);
             })
             .catch(error => {
                 setError('Error adding chat');
@@ -159,13 +159,13 @@ const ChatList = () => {
                 </div>
                 <button onClick={handleAddChat} className='add-chat-button'>Add Chat</button>
                 {error && <p className="error-message">{error}</p>}
-                {success && <p className="success-message">Chat added successfully!</p>}
             </div>
             <div ref={chatListRef} className="card-list">
                 <SearchBar onSearch={handleSearch} />
                 {filteredChats.map(chat => (
                     <ChatCard key={chat.chat_id} chat={chat} />
                 ))}
+                {success && <p className="success-message">Chat added successfully!</p>}
             </div>
         </div>
     );

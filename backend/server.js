@@ -242,12 +242,22 @@ wss.on('connection', async function connection(ws, req) {
             try {
                 const message = JSON.parse(data);
                 if (message.user_id && message.content) {
+                    const currentTimeStamp = new Date().toISOString();
                     const client = await pool.connect();
                     await client.query(
-                        'INSERT INTO Messages (conversation_id, user_id, content) VALUES ($1, $2, $3)',
-                        [conversationId, message.user_id, message.content]
+                        'INSERT INTO Messages (conversation_id, user_id, content, timestamp) VALUES ($1, $2, $3, $4)',
+                        [conversationId, message.user_id, message.content, currentTimeStamp]
                     );
                     client.release();
+
+                    message.timestamp = currentTimeStamp;
+                    const messageWithTimestamp = JSON.stringify(message);
+
+                    wss.clients.forEach(function each(client) {
+                        if (client !== ws && client.readyState === WebSocket.OPEN) {
+                            client.send(messageWithTimestamp);
+                        }
+                    });
                 } else {
                     console.error('One or more fields are null. Message not inserted.');
                 }
@@ -255,11 +265,6 @@ wss.on('connection', async function connection(ws, req) {
                 console.error('Error inserting message:', error);
             }
 
-            wss.clients.forEach(function each(client) {
-                if (client !== ws && client.readyState === WebSocket.OPEN) {
-                    client.send(data);
-                }
-            });
         });
     } catch (error) {
         console.error('Error handling WebSocket connection:', error);

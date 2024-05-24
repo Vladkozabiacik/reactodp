@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+import './ChatCard.css'; 
 const ChatCard = ({ chat }) => {
     return (
         <div className="card">
-            <h3>{chat.name}</h3>
+            <h3 className='header-chat-name'>{chat.name}</h3>
             <Link to={`/chat/${chat.chat_id}`}>
-                <button>Go to Chat</button>
+                <button className='go-to-chat-button'>Go to Chat</button>
             </Link>
         </div>
     );

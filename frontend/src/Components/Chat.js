@@ -71,7 +71,7 @@ const Chat = () => {
   }, [ws, conversationId, userId]);
 
   const loadMessage = message => {
-    setMessages(prevMessages => [...prevMessages, message]);
+    setMessages(prevMessages => [message, ...prevMessages]);
   };
 
   const addMessage = message => {

@@ -1,0 +1,138 @@
+
+.register {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.register.dark {
+    background-color: #333;
+    color: #f9f9f9;
+}
+
+.register h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #7f7f7f;
+}
+.register.dark h2 {
+    color: #eaeaea;
+}
+
+.formular {
+    display: flex;
+    flex-direction: column;
+}
+
+.formular input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.register.dark .formular input {
+    background-color: #555;
+    color: #f9f9f9;
+    border: 1px solid #777;
+}
+
+.formular button {
+    padding: 10px;
+    background-color: #7f7f7f;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.formular button:hover {
+    background-color: #494949;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.register.dark .error-message {
+    color: #ff6666;
+}
+
+.success-message {
+    color: green;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.register.dark .success-message {
+    color: #66ff66;
+}
+
+.swap {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.swap p {
+    margin-bottom: 10px;
+    color: #7f7f7f;
+}
+
+.swap button {
+    padding: 5px 10px;
+    background-color: transparent;
+    border: 1px solid #7f7f7f;
+    border-radius: 5px;
+    color: #7f7f7f;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.register.dark .swap button {
+    border-color: #f9f9f9;
+    color: #f9f9f9;
+}
+
+.swap button:hover {
+    background-color: #494949;
+    color: white;
+}
+
+.register.dark .swap button:hover {
+    background-color: #494949;
+}
+
+.dark-mode-toggle {
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    background-color: #7f7f7f;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.dark-mode-toggle:hover {
+    background-color: #494949;
+}
+
+.register.dark .dark-mode-toggle {
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.register.dark .dark-mode-toggle:hover {
+    background-color: #e0e0e0;
+}
